@@ -1,1 +1,1 @@
-Spring Cloud Stream Binder for Apache Kafka
+Spring Cloud Stream Binder for Apache RocketMQ
