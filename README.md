@@ -1,0 +1,2 @@
+# spring-cloud-bus-stream-binder-rocketmq
+Spring Cloud Bus based on Apache RocketMQ as stream binder links nodes of a distributed system just like other lightweight message broker such as Kafka, rabbitmq,etc. This can then be used to broadcast state changes (e.g. configuration changes) or other management instructions. This implementation currently is on the roadmap for Apache RocketMQ as transports.
