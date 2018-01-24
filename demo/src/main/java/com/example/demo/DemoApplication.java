@@ -2,6 +2,7 @@ package com.example.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.bus.event.RefreshListener;
 import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +10,7 @@ import org.springframework.messaging.converter.MessageConverter;
 
 @SpringBootApplication
 @RefreshScope
-@RemoteApplicationEventScan(basePackages="com.example.demo")
+@RemoteApplicationEventScan(basePackages= {"com.example.demo", "org.springframework.cloud.bus.event"})
 public class DemoApplication {
 
 	public static void main(String[] args) {
@@ -26,4 +27,6 @@ public class DemoApplication {
 //	public MessageConverter customMessageConverter() {
 //		return new MyCustomMessageConverter();
 //	}
+	
+	
 }

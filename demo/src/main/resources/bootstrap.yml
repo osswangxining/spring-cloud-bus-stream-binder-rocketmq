@@ -5,3 +5,6 @@ spring:
     bus:
       trace:
         enabled: true    
+management:
+  security:
+    enabled: false        
