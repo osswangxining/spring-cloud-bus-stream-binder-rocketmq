@@ -1,5 +1,6 @@
 package org.springframework.cloud.stream.binder.rocketmq.support;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
@@ -12,9 +13,12 @@ import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cloud.stream.binder.EmbeddedHeaderUtils;
 import org.springframework.cloud.stream.binder.ExtendedConsumerProperties;
+import org.springframework.cloud.stream.binder.MessageValues;
 import org.springframework.cloud.stream.binder.rocketmq.properties.RocketMQConsumerProperties;
 import org.springframework.integration.endpoint.MessageProducerSupport;
+import org.springframework.messaging.Message;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -57,20 +61,25 @@ public class RocketMQMessageListener extends MessageProducerSupport {
 					logger.info(Thread.currentThread().getName() + " Receive New Messages[size={}]: {}", msgs.size(),
 							msgs);
 					for (MessageExt messageExt : msgs) {
-						byte[] body = messageExt.getBody();
-						String payload = null;
+						byte[] payload = messageExt.getBody();
 						try {
-//							MessageValues mv = EmbeddedHeaderUtils.extractHeaders(body);
-//							byte[] rawPayloadNoHeaders = (byte[]) mv.getPayload();
-							payload = new String(body, "UTF-8");
-							logger.info(payload);
-							logger.info(getOutputChannel().toString());
-							sendMessage(getMessageBuilderFactory().withPayload(body).build());
-
-						} catch (Exception e) {
-							e.printStackTrace();
-							payload = null;
+							logger.info("Listener:" + new String(payload, "UTF-8"));
+						} catch (UnsupportedEncodingException e1) {
+							e1.printStackTrace();
 						}
+						try {
+							MessageValues mv = EmbeddedHeaderUtils.extractHeaders(payload);
+							logger.info("mv.payload:{}, headers:{}", mv.getPayload(), mv.getHeaders() );
+							Message<?> internalMsgObject = getMessageBuilderFactory().withPayload((byte[])mv.getPayload())
+									.copyHeaders(mv.getHeaders()).build();
+							sendMessage(internalMsgObject);
+						} catch (Exception e) {
+//							Message<?> internalMsgObject = getMessageBuilderFactory().withPayload(payload).build();
+//							sendMessage(internalMsgObject);
+							e.printStackTrace();
+							logger.info("==========" + e.getMessage());
+						}
+						payload = null;
 					}
 					return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
 				}

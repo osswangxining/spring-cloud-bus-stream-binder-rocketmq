@@ -1,0 +1,169 @@
+= Spring Cloud Bus
+:github: https://github.com/spring-cloud/spring-cloud-config
+:githubmaster: {github}/tree/master
+:docslink: {githubmaster}/docs/src/main/asciidoc
+:toc:
+:nofooter:
+
+include::intro.adoc[]
+
+include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/master/docs/src/main/asciidoc/contributing-docs.adoc[]
+
+== Quick Start
+
+include::quickstart.adoc[]
+
+== Addressing an Instance
+
+The HTTP endpoints accept a "destination" parameter, e.g. "/bus/refresh?destination=customers:9000", where the destination is an `ApplicationContext` ID. If the ID is owned by an instance on the Bus then it will process the message and all other instances will ignore it. Spring Boot sets the ID for you in the `ContextIdApplicationContextInitializer` to a combination of the `spring.application.name`, active profiles and `server.port` by default.
+
+== Addressing all instances of a service
+
+The "destination" parameter is used in a Spring `PathMatcher` (with the path separator as a colon `:`) to determine if an instance will process the message.   Using the example from above, "/bus/refresh?destination=customers:**" will  target  all instances of the "customers" service regardless of the profiles and ports set as the `ApplicationContext` ID.
+
+== Application Context ID must be unique
+
+The bus tries to eliminate processing an event twice, once from the original `ApplicationEvent` and once from the queue.  To do this, it checks the sending application context id againts the current application context id.  If multiple instances of a service have the same application context id, events will not be processed.  Running on a local machine, each service will be on a different port and that will be part of the application context id.  Cloud Foundry supplies an index to differentiate.  To ensure that the application context id is the unique, set `spring.application.index` to something unique for each instance of a service.  For example, in lattice, set `spring.application.index=${INSTANCE_INDEX}` in application.properties (or bootstrap.properties if using configserver).
+
+== Customizing the Message Broker
+
+Spring Cloud Bus uses
+https://cloud.spring.io/spring-cloud-stream[Spring Cloud Stream] to
+broadcast the messages so to get messages to flow you only need to
+include the binder implementation of your choice in the
+classpath. There are convenient starters specifically for the bus with
+AMQP (RabbitMQ) and Kafka
+(`spring-cloud-starter-bus-[amqp,kafka]`). Generally speaking
+Spring Cloud Stream relies on Spring Boot autoconfiguration
+conventions for configuring middleware, so for instance the AMQP
+broker address can be changed with `spring.rabbitmq.{asterisk}`
+configuration properties. Spring Cloud Bus has a handful of native
+configuration properties in `spring.cloud.bus.{asterisk}`
+(e.g. `spring.cloud.bus.destination` is the name of the topic to use
+the the externall middleware). Normally the defaults will suffice.
+
+To lean more about how to customize the message broker settings
+consult the Spring Cloud Stream documentation.
+
+== Tracing Bus Events
+
+Bus events (subclasses of `RemoteApplicationEvent`) can be traced by
+setting `spring.cloud.bus.trace.enabled=true`. If you do this then the
+Spring Boot `TraceRepository` (if it is present) will show each event
+sent and all the acks from each service instance. Example (from the
+`/trace` endpoint):
+
+[source,json]
+----
+{
+  "timestamp": "2015-11-26T10:24:44.411+0000",
+  "info": {
+    "signal": "spring.cloud.bus.ack",
+    "type": "RefreshRemoteApplicationEvent",
+    "id": "c4d374b7-58ea-4928-a312-31984def293b",
+    "origin": "stores:8081",
+    "destination": "*:**"
+  }
+  },
+  {
+  "timestamp": "2015-11-26T10:24:41.864+0000",
+  "info": {
+    "signal": "spring.cloud.bus.sent",
+    "type": "RefreshRemoteApplicationEvent",
+    "id": "c4d374b7-58ea-4928-a312-31984def293b",
+    "origin": "customers:9000",
+    "destination": "*:**"
+  }
+  },
+  {
+  "timestamp": "2015-11-26T10:24:41.862+0000",
+  "info": {
+    "signal": "spring.cloud.bus.ack",
+    "type": "RefreshRemoteApplicationEvent",
+    "id": "c4d374b7-58ea-4928-a312-31984def293b",
+    "origin": "customers:9000",
+    "destination": "*:**"
+  }
+}
+----
+
+This trace shows that a `RefreshRemoteApplicationEvent` was sent from
+`customers:9000`, broadcast to all services, and it was received
+(acked) by `customers:9000` and `stores:8081`.
+
+To handle the ack signals yourself you could add an `@EventListener`
+for the `AckRemoteApplicationEvent` and `SentApplicationEvent` types
+to your app (and enable tracing). Or you could tap into the
+`TraceRepository` and mine the data from there.
+
+NOTE: Any Bus application can trace acks, but sometimes it will be
+useful to do this in a central service that can do more complex
+queries on the data. Or forward it to a specialized tracing service.
+
+== Broadcasting Your Own Events
+
+The Bus can carry any event of type `RemoteApplicationEvent`, but the
+default transport is JSON and the deserializer needs to know which
+types are going to be used ahead of time. To register a new type it
+needs to be in a subpackage of `org.springframework.cloud.bus.event`.
+
+To customise the event name you can use `@JsonTypeName` on your custom class
+or rely on the default strategy which is to use the simple name of the class.
+Note that both the producer and the consumer will need access to the class
+definition.
+
+=== Registering events in custom packages
+
+If you cannot or don't want to use a subpackage of `org.springframework.cloud.bus.event`
+for your custom events, you must specify which packages to scan for events of
+type `RemoteApplicationEvent` using `@RemoteApplicationEventScan`. Packages
+specified with `@RemoteApplicationEventScan` include subpackages.
+
+For example, if you have a custom event called `FooEvent`:
+
+[source,java]
+----
+package com.acme;
+
+public class FooEvent extends RemoteApplicationEvent {
+    ...
+}
+----
+
+you can register this event with the deserializer in the following way:
+
+[source,java]
+----
+package com.acme;
+
+@Configuration
+@RemoteApplicationEventScan
+public class BusConfiguration {
+    ...
+}
+----
+
+Without specifying a value, the package of the class where `@RemoteApplicationEventScan`
+is used will be registered. In this example `com.acme` will be registered using the
+package of `BusConfiguration`.
+
+You can also explicitly specify the packages to scan using the `value`, `basePackages` or
+`basePackageClasses` properties on `@RemoteApplicationEventScan`. For example:
+
+[source,java]
+----
+package com.acme;
+
+@Configuration
+//@RemoteApplicationEventScan({"com.acme", "foo.bar"})
+//@RemoteApplicationEventScan(basePackages = {"com.acme", "foo.bar", "fizz.buzz"})
+@RemoteApplicationEventScan(basePackageClasses = BusConfiguration.class)
+public class BusConfiguration {
+    ...
+}
+----
+
+All examples of `@RemoteApplicationEventScan` above are equivalent,
+in that the `com.acme` package will be registered by explicitly specifying the
+packages on `@RemoteApplicationEventScan`. Note, you can specify multiple base
+packages to scan.

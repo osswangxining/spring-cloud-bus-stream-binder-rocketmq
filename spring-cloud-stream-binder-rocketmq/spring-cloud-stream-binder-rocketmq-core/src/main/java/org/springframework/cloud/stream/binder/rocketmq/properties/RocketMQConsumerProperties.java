@@ -19,6 +19,8 @@ package org.springframework.cloud.stream.binder.rocketmq.properties;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.cloud.stream.binder.HeaderMode;
+
 /**
  * @author Xi Ning Wang
  *
@@ -44,6 +46,8 @@ public class RocketMQConsumerProperties {
 
 	private Map<String, String> configuration = new HashMap<>();
 
+	private HeaderMode headerMode = HeaderMode.raw;
+	
 	public boolean isAutoCommitOffset() {
 		return this.autoCommitOffset;
 	}
@@ -129,5 +133,13 @@ public class RocketMQConsumerProperties {
 
 	public void setTags(String tags) {
 		this.tags = tags;
+	}
+	
+	public HeaderMode getHeaderMode() {
+		return this.headerMode;
+	}
+
+	public void setHeaderMode(HeaderMode headerMode) {
+		this.headerMode = headerMode;
 	}
 }

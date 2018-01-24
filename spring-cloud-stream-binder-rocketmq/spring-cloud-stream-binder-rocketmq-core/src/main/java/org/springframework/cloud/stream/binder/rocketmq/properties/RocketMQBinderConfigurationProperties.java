@@ -281,7 +281,7 @@ public class RocketMQBinderConfigurationProperties {
 //		// Override Spring Boot bootstrap server setting if left to default with the value
 //		// configured in the binder
 //		if (ObjectUtils.isEmpty(consumerConfiguration.get(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG))) {
-//			consumerConfiguration.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getKafkaConnectionString());
+//			consumerConfiguration.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getRocketMQConnectionString());
 //		}
 //		else {
 //			Object boostrapServersConfig = consumerConfiguration.get(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG);
@@ -290,7 +290,7 @@ public class RocketMQBinderConfigurationProperties {
 //				List<String> bootStrapServers = (List<String>) consumerConfiguration
 //						.get(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG);
 //				if (bootStrapServers.size() == 1 && bootStrapServers.get(0).equals("localhost:9092")) {
-//					consumerConfiguration.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getKafkaConnectionString());
+//					consumerConfiguration.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getRocketMQConnectionString());
 //				}
 //			}
 //		}
@@ -309,7 +309,7 @@ public class RocketMQBinderConfigurationProperties {
 //		// Override Spring Boot bootstrap server setting if left to default with the value
 //		// configured in the binder
 //		if (ObjectUtils.isEmpty(producerConfiguration.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG))) {
-//			producerConfiguration.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, getKafkaConnectionString());
+//			producerConfiguration.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, getRocketMQConnectionString());
 //		}
 //		else {
 //			Object boostrapServersConfig = producerConfiguration.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG);
@@ -318,7 +318,7 @@ public class RocketMQBinderConfigurationProperties {
 //				List<String> bootStrapServers = (List<String>) producerConfiguration
 //						.get(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG);
 //				if (bootStrapServers.size() == 1 && bootStrapServers.get(0).equals("localhost:9092")) {
-//					producerConfiguration.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, getKafkaConnectionString());
+//					producerConfiguration.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, getRocketMQConnectionString());
 //				}
 //			}
 //		}

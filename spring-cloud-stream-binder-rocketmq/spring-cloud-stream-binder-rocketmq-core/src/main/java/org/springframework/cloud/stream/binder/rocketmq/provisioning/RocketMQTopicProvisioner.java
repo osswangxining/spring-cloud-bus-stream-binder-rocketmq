@@ -54,8 +54,8 @@ public class RocketMQTopicProvisioner implements ProvisioningProvider<ExtendedCo
 
 	private RetryOperations metadataRetryOperations;
 
-	public RocketMQTopicProvisioner(RocketMQBinderConfigurationProperties kafkaBinderConfigurationProperties) {
-		this.configurationProperties = kafkaBinderConfigurationProperties;
+	public RocketMQTopicProvisioner(RocketMQBinderConfigurationProperties binderConfigurationProperties) {
+		this.configurationProperties = binderConfigurationProperties;
 	}
 
 	/**
@@ -202,8 +202,8 @@ public class RocketMQTopicProvisioner implements ProvisioningProvider<ExtendedCo
 //						}
 //						catch (Exception e) {
 //							String exceptionClass = e.getClass().getName();
-//							if (exceptionClass.equals("kafka.common.TopicExistsException")
-//									|| exceptionClass.equals("org.apache.kafka.common.errors.TopicExistsException")) {
+//							if (exceptionClass.equals("TopicExistsException")
+//									|| exceptionClass.equals("errors.TopicExistsException")) {
 //								if (logger.isWarnEnabled()) {
 //									logger.warn("Attempt to create topic: " + topicName + ". Topic already exists.");
 //								}
@@ -217,7 +217,7 @@ public class RocketMQTopicProvisioner implements ProvisioningProvider<ExtendedCo
 //				});
 //			}
 //			else {
-//				throw new ProvisioningException("Error fetching Kafka topic metadata: ",
+//				throw new ProvisioningException("Error fetching topic metadata: ",
 //						ErrorMapping.exceptionFor(errorCode));
 //			}
 //		}
