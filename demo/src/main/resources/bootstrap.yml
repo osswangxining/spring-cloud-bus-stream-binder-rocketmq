@@ -3,6 +3,9 @@ spring:
     name: testApp4RocketMQBus
   cloud:
     bus:
+      enabled: true
+      refresh:
+        enabled: true
       trace:
         enabled: true    
 management:
