@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: testApp4RocketMQBus
+  cloud:
+    bus:
+      trace:
+        enabled: true    
