@@ -25,7 +25,8 @@ public class GuavaCacheBusEndpoint extends AbstractBusEndpoint {
 			@RequestParam(value = "destination", required = false) String destination) {
 		Map<String, String> params = new HashMap<>();
 		params.put("key1", "value1");
-		this.publish(new GuavaCacheChangeRemoteApplicationEvent(this, this.getInstanceId(), destination, params));
+		GuavaCacheChangeRemoteApplicationEvent guavaCacheChangeRemoteApplicationEvent = new GuavaCacheChangeRemoteApplicationEvent(this, this.getInstanceId(), destination, params);
+		this.publish(guavaCacheChangeRemoteApplicationEvent);
 	}
 
 }

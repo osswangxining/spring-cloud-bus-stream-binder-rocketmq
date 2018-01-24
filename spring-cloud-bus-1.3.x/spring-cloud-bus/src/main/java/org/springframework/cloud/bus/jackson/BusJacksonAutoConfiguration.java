@@ -17,7 +17,6 @@
 
 package org.springframework.cloud.bus.jackson;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -52,7 +51,6 @@ import org.springframework.util.MimeTypeUtils;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -161,22 +159,22 @@ class BusJacksonMessageConverter extends AbstractMessageConverter
 		return result;
 	}
 	@Override
-	protected Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
+	public Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
 		try {
 			Class<?> view = getSerializationView(conversionHint);
-			if (byte[].class == getSerializedPayloadClass()) {
-				ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
-				JsonEncoding encoding = getJsonEncoding(getMimeType(headers));
-				JsonGenerator generator = mapper.getFactory().createGenerator(out, encoding);
-				if (view != null) {
-					mapper.writerWithView(view).writeValue(generator, payload);
-				}
-				else {
-					mapper.writeValue(generator, payload);
-				}
-				payload = out.toByteArray();
-			}
-			else {
+//			if (byte[].class == getSerializedPayloadClass()) {
+//				ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
+//				JsonEncoding encoding = getJsonEncoding(getMimeType(headers));
+//				JsonGenerator generator = mapper.getFactory().createGenerator(out, encoding);
+//				if (view != null) {
+//					mapper.writerWithView(view).writeValue(generator, payload);
+//				}
+//				else {
+//					mapper.writeValue(generator, payload);
+//				}
+//				payload = out.toByteArray();
+//			}
+//			else {
 				Writer writer = new StringWriter();
 				if (view != null) {
 					mapper.writerWithView(view).writeValue(writer, payload);
@@ -185,7 +183,7 @@ class BusJacksonMessageConverter extends AbstractMessageConverter
 					mapper.writeValue(writer, payload);
 				}
 				payload = writer.toString();
-			}
+//			}
 		}
 		catch (IOException ex) {
 			throw new MessageConversionException("Could not write JSON: " + ex.getMessage(), ex);
